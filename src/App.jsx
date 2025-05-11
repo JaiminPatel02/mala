@@ -26,13 +26,13 @@ function App() {
     
     // Check if we're going to complete a full round
     if (count === 107) {
-      // Trigger completion animation
+      // Display completion animation but don't block UI
       setShowCompletionEffect(true);
+      setCount(0);
+      setRound(prev => prev + 1);
       
-      // Update after showing animation briefly
+      // Hide animation after it plays
       setTimeout(() => {
-        setCount(0);
-        setRound(prev => prev + 1);
         setShowCompletionEffect(false);
       }, 1500);
     } else if (count < 108) {
@@ -81,7 +81,7 @@ function App() {
         <div className="flex flex-col items-center justify-center">
           {/* Completion Animation Effect */}
           {showCompletionEffect && (
-            <>
+            <div className="absolute inset-0 pointer-events-none z-10">
               {/* Pulsing circle */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="absolute w-64 h-64 rounded-full bg-blue-500 opacity-20 animate-ping"></div>
@@ -106,16 +106,16 @@ function App() {
               
               {/* Completion message */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-black bg-opacity-70 px-6 py-3 rounded-xl text-center z-10">
+                <div className="bg-black bg-opacity-70 px-6 py-3 rounded-xl text-center">
                   <div className="text-blue-400 text-2xl font-bold mb-1 animate-bounce">
                     1 માળા પૂર્ણ!
                   </div>
                   <div className="text-blue-100">
-                    Round {round + 1} completed
+                    Round {round} completed
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {/* SVG Progress Ring */}
@@ -160,14 +160,12 @@ function App() {
               onClick={handleDecrement} 
               className="bg-gray-800 text-white w-10 h-10 rounded-full transition-all duration-300 hover:bg-gray-700 flex items-center justify-center shadow-lg" 
               aria-label="Decrement"
-              disabled={showCompletionEffect}
             >
               <span className="text-xl font-bold leading-none">−</span>
             </button>
             <button 
               onClick={handleIncrement} 
               className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-full font-medium transition-all duration-300 hover:from-blue-600 hover:to-blue-700 flex items-center justify-center shadow-lg hover:shadow-blue-500/20"
-              disabled={showCompletionEffect}
             >
               <span className="text-xl font-semibold mr-1 leading-none">+</span>
               <span>Increment</span>
@@ -176,7 +174,6 @@ function App() {
               onClick={openResetModal} 
               className="bg-gray-800 text-white w-10 h-10 rounded-full transition-all duration-300 hover:bg-gray-700 flex items-center justify-center shadow-lg" 
               aria-label="Reset"
-              disabled={showCompletionEffect}
             >
               <span className="text-xl font-semibold leading-none">⟲</span>
             </button>
