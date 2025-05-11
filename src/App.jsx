@@ -108,7 +108,7 @@ function App() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-black bg-opacity-70 px-6 py-3 rounded-xl text-center">
                   <div className="text-blue-400 text-2xl font-bold mb-1 animate-bounce">
-                    1 માળા પૂર્ણ!
+                    {round} માળા પૂર્ણ!
                   </div>
                   <div className="text-blue-100">
                     Round {round} completed
