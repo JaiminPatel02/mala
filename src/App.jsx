@@ -10,7 +10,7 @@ function App() {
 
   // Load initial values from localStorage
   useEffect(() => {
-    const storedCount = localStorage.getItem('count');
+    const storedCount = localStorage.getItem('count'); 
     const storedRound = localStorage.getItem('round');
     const storedTotalCount = localStorage.getItem('totalCount');
     if (storedCount !== null) setCount(parseInt(storedCount));
