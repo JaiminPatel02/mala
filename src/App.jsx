@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 function App() {
   const [count, setCount] = useState(0);
   const [round, setRound] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showCompletionEffect, setShowCompletionEffect] = useState(false);
@@ -11,47 +12,56 @@ function App() {
   useEffect(() => {
     const storedCount = localStorage.getItem('count');
     const storedRound = localStorage.getItem('round');
+    const storedTotalCount = localStorage.getItem('totalCount');
     if (storedCount !== null) setCount(parseInt(storedCount));
     if (storedRound !== null) setRound(parseInt(storedRound));
+    if (storedTotalCount !== null) setTotalCount(parseInt(storedTotalCount));
   }, []);
 
   // Save to localStorage when values change
   useEffect(() => {
     localStorage.setItem('count', count.toString());
     localStorage.setItem('round', round.toString());
-  }, [count, round]);
+    localStorage.setItem('totalCount', totalCount.toString());
+  }, [count, round , totalCount]);
 
-  const handleIncrement = () => {
-    setIsAnimating(true);
-    
-    // Check if we're going to complete a full round
-    if (count === 107) {
-      // Display completion animation but don't block UI
-      setShowCompletionEffect(true);
-      setCount(0);
+const handleIncrement = () => {
+  setIsAnimating(true);
+
+  setCount(prevCount => {
+    if (prevCount === 107) {
       setRound(prev => prev + 1);
-      
-      // Hide animation after it plays
-      setTimeout(() => {
-        setShowCompletionEffect(false);
-      }, 1500);
-    } else if (count < 108) {
-      setCount(prev => prev + 1);
+      setTotalCount(prev => prev + 1);
+      setShowCompletionEffect(true);
+      setTimeout(() => setShowCompletionEffect(false), 1500);
+      return 0;
+    } else {
+      setTotalCount(prev => prev + 1);
+      return prevCount + 1;
     }
-    
-    setTimeout(() => setIsAnimating(false), 300);
-  };
+  });
 
-  const handleDecrement = () => {
-    setIsAnimating(true);
-    if (count > 0) {
-      setCount(prev => prev - 1);
+  setTimeout(() => setIsAnimating(false), 300);
+};
+
+ const handleDecrement = () => {
+  setIsAnimating(true);
+
+  setCount(prevCount => {
+    if (prevCount > 0) {
+      setTotalCount(prev => Math.max(0, prev - 1));
+      return prevCount - 1;
     } else if (round > 0) {
-      setCount(108);
-      setRound(prev => prev - 1);
+      setRound(prev => Math.max(0, prev - 1));
+      setTotalCount(prev => Math.max(0, prev - 1));
+      return 107;
     }
-    setTimeout(() => setIsAnimating(false), 300);
-  };
+    return 0; // If count and round both are 0
+  });
+
+  setTimeout(() => setIsAnimating(false), 300);
+};
+
 
   const openResetModal = () => setShowResetModal(true);
   const closeResetModal = () => setShowResetModal(false);
@@ -59,10 +69,50 @@ function App() {
   const handleReset = () => {
     localStorage.removeItem('count');
     localStorage.removeItem('round');
+    localStorage.removeItem('totalCount');
     setCount(0);
     setRound(0);
+    setTotalCount(0);
     closeResetModal();
   };
+
+  
+useEffect(() => {
+  const handleKeyDown = (event) => {
+    // If reset modal is open
+    if (showResetModal) {
+      if (event.key === 'Enter') {
+        handleReset(); // Confirm reset
+      }
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        closeResetModal(); // Cancel reset
+      }
+      return;
+    }
+
+    // General key handling
+    if (event.code === 'Space' || event.code === 'Enter') {
+      event.preventDefault(); // Prevent scroll or unwanted behavior
+      handleIncrement();
+    }
+
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      handleDecrement();
+    }
+
+    // Shift + R to open reset modal
+    if (event.key.toLowerCase() === 'r' && event.shiftKey) {
+      openResetModal();
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [showResetModal]); // include showResetModal in dependencies
+
+
 
   const progress = (count / 108) * 100;
   const circumference = 2 * Math.PI * 42;
@@ -179,6 +229,10 @@ function App() {
             </button>
           </div>
         </div>
+          <div className="bg-gray-800 bg-opacity-50 px-4 py-2 rounded-full mb-8">
+            <span className="text-gray-400 font-medium">Total count</span>
+            <span className="text-white font-semibold ml-2">{totalCount}</span>
+          </div>
       </div>
 
       {/* Modal */}
